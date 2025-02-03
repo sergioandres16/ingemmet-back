@@ -45,33 +45,17 @@ public class SecurityConfig {
      * Configuración principal de Spring Security
      */
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        // Deshabilitamos CSRF para APIs stateless
-        http.csrf(csrf -> csrf.disable());
-
-        // Configuramos las rutas permitidas
-        http.authorizeHttpRequests(auth -> auth
-                // Endpoints públicos
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-
-                // Cualquier otra ruta requiere autenticación
-                .anyRequest().authenticated()
-        );
-
-        // No guardamos sesión en servidor (100% stateless)
-        http.sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        );
-
-        // Manejador de errores de autenticación
-        http.exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthEntryPoint));
-
-        // Filtro para JWT antes de UsernamePasswordAuthenticationFilter
-        http.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
-
-        // Otras personalizaciones (Opcional)
-        http.httpBasic(Customizer.withDefaults());
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        .anyRequest().authenticated()
+                )
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthEntryPoint))
+                .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
+                .httpBasic(httpBasic -> httpBasic.disable());
 
         return http.build();
     }
