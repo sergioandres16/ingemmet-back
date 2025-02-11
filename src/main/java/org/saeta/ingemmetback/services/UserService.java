@@ -16,11 +16,11 @@ public class UserService {
     private final BCryptPasswordEncoder passwordEncoder;
 
     /**
-     * Crea un usuario en la base de datos (registrar).
-     * @throws RuntimeException si username/email ya existen.
+     * Crea un usuario en la base de datos (registro).
+     * @throws RuntimeException si el username o email ya existen.
      */
     public User registerUser(String username, String email, String rawPassword) {
-        // Verificar duplicados
+        // Verifica duplicados
         if(userRepository.findByUsername(username).isPresent()) {
             throw new RuntimeException("El username ya existe: " + username);
         }
@@ -28,7 +28,7 @@ public class UserService {
             throw new RuntimeException("El email ya existe: " + email);
         }
 
-        // Hashear password
+        // Hashea el password
         String hashed = passwordEncoder.encode(rawPassword);
 
         User user = new User();
@@ -40,29 +40,28 @@ public class UserService {
     }
 
     /**
-     * Busca un usuario por username
+     * Busca un usuario por username.
      */
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
 
     /**
-     * Comprueba credenciales para login
+     * Comprueba las credenciales para el login.
      */
     public User login(String usernameOrEmail, String rawPassword) {
-        // Buscar user por username o email
+        // Buscar usuario por username o email
         Optional<User> userOpt = userRepository.findByUsername(usernameOrEmail);
-        if(!userOpt.isPresent()) {
-            // Intentar por email si no está por username
+        if (!userOpt.isPresent()) {
+            // Intentar por email si no se encuentra por username
             userOpt = userRepository.findByEmail(usernameOrEmail);
-            if(!userOpt.isPresent()) {
+            if (!userOpt.isPresent()) {
                 throw new RuntimeException("Usuario no encontrado");
             }
         }
 
         User user = userOpt.get();
-        // Validar password con BCrypt
-        if(!passwordEncoder.matches(rawPassword, user.getPasswordHash())) {
+        if (!passwordEncoder.matches(rawPassword, user.getPasswordHash())) {
             throw new RuntimeException("Contraseña inválida");
         }
         return user;

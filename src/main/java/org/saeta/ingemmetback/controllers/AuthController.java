@@ -24,15 +24,16 @@ public class AuthController {
      */
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
-        // Crea usuario en la BD
+        // Crea usuario en la base de datos
         User newUser = userService.registerUser(
                 request.getUsername(),
                 request.getEmail(),
                 request.getPassword()
         );
-        // Generamos un token JWT
+        // Genera un token JWT
         String token = jwtUtil.generateToken(newUser);
-        return ResponseEntity.ok(new AuthResponse(token));
+        // Retorna el token junto con el nombre y el correo
+        return ResponseEntity.ok(new AuthResponse(token, newUser.getUsername(), newUser.getEmail()));
     }
 
     /**
@@ -40,11 +41,12 @@ public class AuthController {
      */
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest request) {
-        // Verificamos credenciales
+        // Verifica las credenciales
         User user = userService.login(request.getUsernameOrEmail(), request.getPassword());
-        // Generamos token
+        // Genera el token JWT
         String token = jwtUtil.generateToken(user);
-        return ResponseEntity.ok(new AuthResponse(token));
+        // Retorna el token junto con el nombre y el correo
+        return ResponseEntity.ok(new AuthResponse(token, user.getUsername(), user.getEmail()));
     }
 
     /**
@@ -53,11 +55,11 @@ public class AuthController {
     @GetMapping("/validate")
     public ResponseEntity<?> validateToken(@RequestHeader("Authorization") String authHeader) {
         // authHeader = "Bearer <token>"
-        if(!authHeader.startsWith("Bearer ")) {
+        if (!authHeader.startsWith("Bearer ")) {
             return ResponseEntity.badRequest().body("Token inválido");
         }
         String token = authHeader.substring(7);
-        if(jwtUtil.validateToken(token)) {
+        if (jwtUtil.validateToken(token)) {
             return ResponseEntity.ok("Token válido");
         } else {
             return ResponseEntity.status(401).body("Token inválido o expirado");
