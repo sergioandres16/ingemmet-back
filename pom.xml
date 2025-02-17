@@ -23,6 +23,7 @@
         <spring-boot.version>3.4.2</spring-boot.version>
         <springdoc.version>2.1.0</springdoc.version>
         <auth0.jwt.version>4.3.0</auth0.jwt.version>
+        <poi.version>5.2.3</poi.version>
     </properties>
 
     <repositories>
@@ -90,6 +91,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>${poi.version}</version>
         </dependency>
     </dependencies>
 
